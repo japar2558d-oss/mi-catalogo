@@ -1,7 +1,7 @@
 body {
   background: #111;
   color: white;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   text-align: center;
   margin: 0;
   padding: 20px;
@@ -17,6 +17,26 @@ input {
   border-radius: 8px;
   border: none;
   margin-bottom: 20px;
+  text-align: center;
+}
+
+.genres {
+  margin: 20px 0;
+}
+
+.genres button {
+  margin: 5px;
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background: #222;
+  color: white;
+  transition: 0.3s;
+}
+
+.genres button:hover {
+  background: #444;
 }
 
 #movies {
@@ -24,6 +44,7 @@ input {
   grid-template-columns: repeat(auto-fill, 200px);
   gap: 20px;
   justify-content: center;
+  margin-top: 20px;
 }
 
 .movie {
@@ -40,4 +61,26 @@ input {
 .movie img {
   width: 100%;
   border-radius: 10px;
+}
+
+.movie h3 {
+  font-size: 16px;
+}
+
+.movie p {
+  margin: 5px 0;
+}
+
+button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #e50914;
+  color: white;
+  margin-top: 5px;
+}
+
+button:hover {
+  opacity: 0.8;
 }
