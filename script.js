@@ -1,18 +1,31 @@
-const apiKey = "9b8867a200003113b17926f0ff2cdb43";
+/* =========================
+   CONFIGURACIÓN SUPABASE
+========================= */
 
-/* 🔥 TU COLECCIÓN PÚBLICA (pon aquí los IDs que quieras) */
-const myCollection = [
-  496243, // Parásitos (ejemplo)
-  299534, // Avengers Endgame (ejemplo)
-  603     // Matrix (ejemplo)
-];
+const SUPABASE_URL = "https://gnfefbauiuowzthrdghb.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_3_VKI1uwVaWfzp7OCVyitQ_f-p6Q9Ez";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+/* =========================
+   TMDB API
+========================= */
+
+const apiKey = "9b8867a200003113b17926f0ff2cdb43"; // deja tu key de TMDB aquí
+
+
+/* =========================
+   ELEMENTOS HTML
+========================= */
 
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
-/* ========================= */
-/* 🔎 BUSCADOR NORMAL */
-/* ========================= */
+
+/* =========================
+   BUSCAR PELÍCULAS
+========================= */
 
 searchInput.addEventListener("keypress", function (e) {
   if (e.key === "Enter") {
@@ -33,9 +46,10 @@ async function searchMovies(query) {
   showMovies(data.results);
 }
 
-/* ========================= */
-/* 🎬 MOSTRAR PELÍCULAS */
-/* ========================= */
+
+/* =========================
+   MOSTRAR PELÍCULAS
+========================= */
 
 function showMovies(movies) {
   moviesDiv.innerHTML = "";
@@ -44,51 +58,94 @@ function showMovies(movies) {
     const movieEl = document.createElement("div");
     movieEl.classList.add("movie");
 
+    const poster = movie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+      : "https://via.placeholder.com/300x450?text=Sin+Imagen";
+
     movieEl.innerHTML = `
-      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" />
+      <img src="${poster}" />
       <h3>${movie.title}</h3>
       <p>⭐ ${movie.vote_average}</p>
-      <p>${movie.release_date}</p>
+      <p>${movie.release_date || "Sin fecha"}</p>
+      <button onclick="guardarPelicula(${movie.id}, '${movie.title.replace(/'/g, "")}', '${movie.poster_path}', ${movie.vote_average}, '${movie.release_date}')">
+        Agregar a mi colección
+      </button>
     `;
 
     moviesDiv.appendChild(movieEl);
   });
 }
 
-/* ========================= */
-/* 🌍 CARGAR TU COLECCIÓN */
-/* ========================= */
 
-async function loadCollection() {
-  moviesDiv.innerHTML = "Cargando colección...";
+/* =========================
+   GUARDAR EN SUPABASE
+========================= */
 
-  const requests = myCollection.map(id =>
-    fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=es-ES`)
-      .then(res => res.json())
-  );
+async function guardarPelicula(id, title, poster_path, rating, release_date) {
 
-  const movies = await Promise.all(requests);
+  const { data, error } = await supabase
+    .from("mi catalogo")
+    .insert([
+      {
+        tmdb_id: id,
+        title: title,
+        poster_path: poster_path,
+        rating: rating,
+        release_date: release_date,
+      },
+    ]);
 
-  showMovies(movies);
+  if (error) {
+    alert("Error al guardar");
+    console.log(error);
+  } else {
+    alert("Película agregada 🔥");
+    cargarColeccion();
+  }
 }
 
-/* ========================= */
-/* 🎭 FILTRO POR GÉNERO */
-/* ========================= */
 
-async function filterGenre(genreId) {
-  moviesDiv.innerHTML = "Cargando...";
+/* =========================
+   CARGAR COLECCIÓN
+========================= */
 
-  const res = await fetch(
-    `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=es-ES&with_genres=${genreId}`
-  );
+async function cargarColeccion() {
 
-  const data = await res.json();
-  showMovies(data.results);
+  const { data, error } = await supabase
+    .from("mi catalogo")
+    .select("*");
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  moviesDiv.innerHTML = "";
+
+  data.forEach((movie) => {
+    const movieEl = document.createElement("div");
+    movieEl.classList.add("movie");
+
+    const poster = movie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+      : "https://via.placeholder.com/300x450?text=Sin+Imagen";
+
+    movieEl.innerHTML = `
+      <img src="${poster}" />
+      <h3>${movie.title}</h3>
+      <p>⭐ ${movie.rating}</p>
+      <p>${movie.release_date || "Sin fecha"}</p>
+    `;
+
+    moviesDiv.appendChild(movieEl);
+  });
 }
 
-/* ========================= */
-/* 🚀 AL ABRIR LA WEB */
-/* ========================= */
 
-loadCollection();
+/* =========================
+   CARGAR AL INICIAR
+========================= */
+
+window.onload = function () {
+  cargarColeccion();
+};
