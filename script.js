@@ -3,7 +3,15 @@ const apiKey = "9b8867a200003113b17926f0ff2cdb43";
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
-// 🔎 Buscar cuando escribas
+let savedMovies = JSON.parse(localStorage.getItem("misPeliculas")) || [];
+
+// Mostrar guardadas al cargar
+window.onload = () => {
+  if (savedMovies.length > 0) {
+    showMovies(savedMovies);
+  }
+};
+
 searchInput.addEventListener("keypress", function (e) {
   if (e.key === "Enter") {
     searchMovies(searchInput.value);
@@ -20,17 +28,11 @@ async function searchMovies(query) {
   );
 
   const data = await res.json();
-
-  showMovies(data.results);
+  showMovies(data.results, true);
 }
 
-function showMovies(movies) {
+function showMovies(movies, allowSave = false) {
   moviesDiv.innerHTML = "";
-
-  if (movies.length === 0) {
-    moviesDiv.innerHTML = "No se encontraron resultados.";
-    return;
-  }
 
   movies.forEach((movie) => {
     const movieEl = document.createElement("div");
@@ -41,9 +43,19 @@ function showMovies(movies) {
       <h3>${movie.title}</h3>
       <p>⭐ ${movie.vote_average}</p>
       <p>${movie.release_date || ""}</p>
+      ${allowSave ? `<button onclick='saveMovie(${JSON.stringify(
+        movie
+      )})'>Guardar</button>` : ""}
     `;
 
     moviesDiv.appendChild(movieEl);
   });
 }
 
+function saveMovie(movie) {
+  if (!savedMovies.find((m) => m.id === movie.id)) {
+    savedMovies.push(movie);
+    localStorage.setItem("misPeliculas", JSON.stringify(savedMovies));
+    alert("Película guardada 🔥");
+  }
+}
