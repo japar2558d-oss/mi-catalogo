@@ -1,0 +1,43 @@
+body {
+  background: #111;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 10px;
+  width: 300px;
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 20px;
+}
+
+#movies {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  gap: 20px;
+  justify-content: center;
+}
+
+.movie {
+  background: #1c1c1c;
+  padding: 10px;
+  border-radius: 10px;
+  transition: transform 0.3s;
+}
+
+.movie:hover {
+  transform: scale(1.05);
+}
+
+.movie img {
+  width: 100%;
+  border-radius: 10px;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Catálogo Personal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🎬 Mi Catálogo Personal</h1>
+
+<input type="text" id="search" placeholder="Buscar película...">
+
+<div id="movies"></div>
+
+<script src="script.js"></script>
+
+<script>
+document.getElementById("search").addEventListener("input", function(e) {
+  const value = e.target.value.toLowerCase();
+  document.querySelectorAll(".movie").forEach(movie => {
+    movie.style.display = movie.innerText.toLowerCase().includes(value)
+      ? "block"
+      : "none";
+  });
+});
+</script>
+
+</body>
+</html>
