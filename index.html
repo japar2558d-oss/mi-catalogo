@@ -7,24 +7,22 @@
 </head>
 <body>
 
-<h1>🎬 Mi Catálogo Personal</h1>
+  <h1>🎬 Mi Catálogo Personal</h1>
 
-<input type="text" id="search" placeholder="Buscar película...">
+  <input type="text" id="search" placeholder="Buscar película y presiona Enter...">
 
-<div id="movies"></div>
+  <!-- Barra de Géneros -->
+  <div class="genres">
+    <button onclick="filterGenre(16)">Animación</button>
+    <button onclick="filterGenre(35)">Comedia</button>
+    <button onclick="filterGenre(18)">Drama</button>
+    <button onclick="filterGenre(28)">Acción</button>
+    <button onclick="filterGenre(27)">Terror</button>
+  </div>
 
-<script src="script.js"></script>
+  <div id="movies"></div>
 
-<script>
-document.getElementById("search").addEventListener("input", function(e) {
-  const value = e.target.value.toLowerCase();
-  document.querySelectorAll(".movie").forEach(movie => {
-    movie.style.display = movie.innerText.toLowerCase().includes(value)
-      ? "block"
-      : "none";
-  });
-});
-</script>
+  <script src="script.js"></script>
 
 </body>
 </html>
