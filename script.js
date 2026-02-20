@@ -1,58 +1,58 @@
-/* =========================
-   CONFIGURACIÓN SUPABASE
-========================= */
+const apiKey = "9b8867a200003113b17926f0ff2cdb43";
 
-const SUPABASE_URL = "https://gnfefbauiuowzthrdghb.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_3_VKI1uwVaWfzp7OCVyitQ_f-p6Q9Ez";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-/* =========================
-   TMDB API
-========================= */
-
-const apiKey = "9b8867a200003113b17926f0ff2cdb43"; // deja tu key de TMDB aquí
-
-
-/* =========================
-   ELEMENTOS HTML
-========================= */
+/* 🔥 TU COLECCIÓN PÚBLICA */
+const myCollection = [
+  496243, // Parásitos
+  299534, // Avengers Endgame
+  603     // Matrix
+];
 
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
+/* ========================= */
+/* 🔎 BUSCADOR */
+/* ========================= */
 
-/* =========================
-   BUSCAR PELÍCULAS
-========================= */
-
-searchInput.addEventListener("keypress", function (e) {
+searchInput.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
-    searchMovies(searchInput.value);
+    e.preventDefault();
+    searchMovies(searchInput.value.trim());
   }
 });
 
 async function searchMovies(query) {
-  if (!query) return;
+  if (!query) {
+    loadCollection(); // si está vacío vuelve a tu colección
+    return;
+  }
 
   moviesDiv.innerHTML = "Buscando...";
 
-  const res = await fetch(
-    `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=es-ES&query=${query}`
-  );
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=es-ES&query=${encodeURIComponent(query)}`
+    );
 
-  const data = await res.json();
-  showMovies(data.results);
+    const data = await res.json();
+    showMovies(data.results);
+  } catch (error) {
+    moviesDiv.innerHTML = "Error al buscar.";
+    console.log(error);
+  }
 }
 
-
-/* =========================
-   MOSTRAR PELÍCULAS
-========================= */
+/* ========================= */
+/* 🎬 MOSTRAR PELÍCULAS */
+/* ========================= */
 
 function showMovies(movies) {
   moviesDiv.innerHTML = "";
+
+  if (!movies || movies.length === 0) {
+    moviesDiv.innerHTML = "No se encontraron resultados.";
+    return;
+  }
 
   movies.forEach((movie) => {
     const movieEl = document.createElement("div");
@@ -65,87 +65,57 @@ function showMovies(movies) {
     movieEl.innerHTML = `
       <img src="${poster}" />
       <h3>${movie.title}</h3>
-      <p>⭐ ${movie.vote_average}</p>
-      <p>${movie.release_date || "Sin fecha"}</p>
-      <button onclick="guardarPelicula(${movie.id}, '${movie.title.replace(/'/g, "")}', '${movie.poster_path}', ${movie.vote_average}, '${movie.release_date}')">
-        Agregar a mi colección
-      </button>
+      <p>⭐ ${movie.vote_average ?? "N/A"}</p>
+      <p>${movie.release_date ?? "Sin fecha"}</p>
     `;
 
     moviesDiv.appendChild(movieEl);
   });
 }
 
+/* ========================= */
+/* 🌍 CARGAR TU COLECCIÓN */
+/* ========================= */
 
-/* =========================
-   GUARDAR EN SUPABASE
-========================= */
+async function loadCollection() {
+  moviesDiv.innerHTML = "Cargando colección...";
 
-async function guardarPelicula(id, title, poster_path, rating, release_date) {
+  try {
+    const requests = myCollection.map(id =>
+      fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=es-ES`)
+        .then(res => res.json())
+    );
 
-  const { data, error } = await supabase
-    .from("mi catalogo")
-    .insert([
-      {
-        tmdb_id: id,
-        title: title,
-        poster_path: poster_path,
-        rating: rating,
-        release_date: release_date,
-      },
-    ]);
-
-  if (error) {
-    alert("Error al guardar");
+    const movies = await Promise.all(requests);
+    showMovies(movies);
+  } catch (error) {
+    moviesDiv.innerHTML = "Error cargando colección.";
     console.log(error);
-  } else {
-    alert("Película agregada 🔥");
-    cargarColeccion();
   }
 }
 
+/* ========================= */
+/* 🎭 FILTRO POR GÉNERO */
+/* ========================= */
 
-/* =========================
-   CARGAR COLECCIÓN
-========================= */
+async function filterGenre(genreId) {
+  moviesDiv.innerHTML = "Cargando...";
 
-async function cargarColeccion() {
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=es-ES&with_genres=${genreId}`
+    );
 
-  const { data, error } = await supabase
-    .from("mi catalogo")
-    .select("*");
-
-  if (error) {
+    const data = await res.json();
+    showMovies(data.results);
+  } catch (error) {
+    moviesDiv.innerHTML = "Error cargando género.";
     console.log(error);
-    return;
   }
-
-  moviesDiv.innerHTML = "";
-
-  data.forEach((movie) => {
-    const movieEl = document.createElement("div");
-    movieEl.classList.add("movie");
-
-    const poster = movie.poster_path
-      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-      : "https://via.placeholder.com/300x450?text=Sin+Imagen";
-
-    movieEl.innerHTML = `
-      <img src="${poster}" />
-      <h3>${movie.title}</h3>
-      <p>⭐ ${movie.rating}</p>
-      <p>${movie.release_date || "Sin fecha"}</p>
-    `;
-
-    moviesDiv.appendChild(movieEl);
-  });
 }
 
+/* ========================= */
+/* 🚀 INICIAR */
+/* ========================= */
 
-/* =========================
-   CARGAR AL INICIAR
-========================= */
-
-window.onload = function () {
-  cargarColeccion();
-};
+loadCollection();
