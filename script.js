@@ -1,16 +1,18 @@
 const apiKey = "9b8867a200003113b17926f0ff2cdb43";
 
+/* 🔥 TU COLECCIÓN PÚBLICA (pon aquí los IDs que quieras) */
+const myCollection = [
+  496243, // Parásitos (ejemplo)
+  299534, // Avengers Endgame (ejemplo)
+  603     // Matrix (ejemplo)
+];
+
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
-let savedMovies = JSON.parse(localStorage.getItem("misPeliculas")) || [];
-
-// Mostrar guardadas al cargar
-window.onload = () => {
-  if (savedMovies.length > 0) {
-    showMovies(savedMovies);
-  }
-};
+/* ========================= */
+/* 🔎 BUSCADOR NORMAL */
+/* ========================= */
 
 searchInput.addEventListener("keypress", function (e) {
   if (e.key === "Enter") {
@@ -28,10 +30,14 @@ async function searchMovies(query) {
   );
 
   const data = await res.json();
-  showMovies(data.results, true);
+  showMovies(data.results);
 }
 
-function showMovies(movies, allowSave = false) {
+/* ========================= */
+/* 🎬 MOSTRAR PELÍCULAS */
+/* ========================= */
+
+function showMovies(movies) {
   moviesDiv.innerHTML = "";
 
   movies.forEach((movie) => {
@@ -39,23 +45,50 @@ function showMovies(movies, allowSave = false) {
     movieEl.classList.add("movie");
 
     movieEl.innerHTML = `
-      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}">
+      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" />
       <h3>${movie.title}</h3>
       <p>⭐ ${movie.vote_average}</p>
-      <p>${movie.release_date || ""}</p>
-      ${allowSave ? `<button onclick='saveMovie(${JSON.stringify(
-        movie
-      )})'>Guardar</button>` : ""}
+      <p>${movie.release_date}</p>
     `;
 
     moviesDiv.appendChild(movieEl);
   });
 }
 
-function saveMovie(movie) {
-  if (!savedMovies.find((m) => m.id === movie.id)) {
-    savedMovies.push(movie);
-    localStorage.setItem("misPeliculas", JSON.stringify(savedMovies));
-    alert("Película guardada 🔥");
-  }
+/* ========================= */
+/* 🌍 CARGAR TU COLECCIÓN */
+/* ========================= */
+
+async function loadCollection() {
+  moviesDiv.innerHTML = "Cargando colección...";
+
+  const requests = myCollection.map(id =>
+    fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=es-ES`)
+      .then(res => res.json())
+  );
+
+  const movies = await Promise.all(requests);
+
+  showMovies(movies);
 }
+
+/* ========================= */
+/* 🎭 FILTRO POR GÉNERO */
+/* ========================= */
+
+async function filterGenre(genreId) {
+  moviesDiv.innerHTML = "Cargando...";
+
+  const res = await fetch(
+    `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=es-ES&with_genres=${genreId}`
+  );
+
+  const data = await res.json();
+  showMovies(data.results);
+}
+
+/* ========================= */
+/* 🚀 AL ABRIR LA WEB */
+/* ========================= */
+
+loadCollection();
