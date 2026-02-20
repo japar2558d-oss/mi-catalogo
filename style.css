@@ -14,6 +14,7 @@ h1 {
 input {
   padding: 10px;
   width: 300px;
+  max-width: 90%;
   border-radius: 8px;
   border: none;
   margin-bottom: 20px;
@@ -41,9 +42,8 @@ input {
 
 #movies {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 20px;
-  justify-content: center;
   margin-top: 20px;
 }
 
@@ -64,11 +64,12 @@ input {
 }
 
 .movie h3 {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .movie p {
   margin: 5px 0;
+  font-size: 14px;
 }
 
 button {
@@ -83,4 +84,29 @@ button {
 
 button:hover {
   opacity: 0.8;
+}
+
+/* 📱 Ajustes móviles reales */
+@media (max-width: 600px) {
+
+  body {
+    padding: 10px;
+  }
+
+  #movies {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  .movie h3 {
+    font-size: 13px;
+  }
+
+  .movie p {
+    font-size: 12px;
+  }
 }
