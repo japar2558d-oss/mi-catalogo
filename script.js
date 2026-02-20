@@ -1,4 +1,4 @@
-const apiKey = "b945301e275c564d8c5baf0f8c54d08d";
+const apiKey = "9b8867a200003113b17926f0ff2cdb43";
 
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
@@ -46,3 +46,4 @@ function showMovies(movies) {
     moviesDiv.appendChild(movieEl);
   });
 }
+
